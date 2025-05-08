@@ -1,27 +1,33 @@
-# Etapa 1: Build de la aplicación Angular
+# Etapa 1: Build de Angular
 FROM node:20 AS build
 
 WORKDIR /app
-
 COPY package*.json ./
-
 RUN npm install
-
 COPY . .
 RUN npm run build --prod
 
-# Etapa 2: Imagen final para servir con http-server
-FROM node:20-slim
+# Etapa 2: NGINX + configuración
+FROM nginx:alpine
 
-WORKDIR /app
+# Opcional: instalar herramientas
+RUN apk update && apk add bash nano
 
-RUN npm install -g http-server
+# Copiar Angular compilado
+COPY --from=build /app/dist/frontend/browser /usr/share/nginx/html/
 
-# Copia los archivos compilados de Angular desde la etapa anterior
-COPY --from=build /app/dist/ /app/dist/
+# Copiar archivo nginx.conf si lo personalizaste
+COPY nginx.conf /etc/nginx/nginx.conf
 
-# Puerto donde se servirá la app (por defecto http-server usa el 8080)
-EXPOSE 8080
+# Copiar el entrypoint que genera config.js
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 
-# Comando para servir la app desde la carpeta de distribución
-CMD ["http-server", "dist", "-p", "8080", "-c-1"]
+# Establecer entrypoint
+ENTRYPOINT ["/docker-entrypoint.sh"]
+
+# Exponer puerto
+EXPOSE 80
+
+# Iniciar NGINX
+CMD ["nginx", "-g", "daemon off;"]
