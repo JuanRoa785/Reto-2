@@ -20,10 +20,12 @@ spec:
         ports:
         - containerPort: 5432
         env:
-        - name: MONGO_INITDB_ROOT_USERNAME
-          value: admin
-        - name: MONGO_INITDB_ROOT_PASSWORD
-          value: password
+        - name: POSTGRES_USER
+          value: postgres
+        - name: POSTGRES_PASSWORD
+          value: adminPostgres
+        - name: POSTGRES_DB
+          value: universegames
 ---
 apiVersion: v1
 kind: Service
@@ -50,4 +52,4 @@ spec:
     - protocol: TCP
       port: 5432
       targetPort: 5432
-      nodePort: 5464
+      nodePort: 30543
