@@ -22,13 +22,22 @@ spec:
         - containerPort: 8080
         env:
         - name: DB_HOST
-          value: reto2-db-service
+          valueFrom:
+            configMapKeyRef:
+              name: postgres-config
+              key: postgres-url
         - name: DB_PORT
           value: "5432"
         - name: DB_USER
-          value: postgres
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-user
         - name: DB_PASS
-          value: adminPostgres
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secret
+              key: postgres-password
 ---
 apiVersion: v1
 kind: Service
