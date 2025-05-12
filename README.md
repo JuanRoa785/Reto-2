@@ -164,6 +164,57 @@ microk8s kubectl apply -f reto2-front-deployment.yaml
 ```bash
 http://localhost:30420
 ```
+
+#### ⚠️ Solución en caso de fallo del Ingress
+
+En algunos entornos (especialmente en clusters con múltiples nodos), el ingreso al backend mediante Ingress puede fallar, mostrando un error similar a este en pantalla:
+
+<p align="center"> 
+  <img src="https://github.com/user-attachments/assets/df32133b-86e7-469c-99b7-a898a5664388" width="1000px"> 
+</p>
+
+Si esto ocurre, puedes seguir estos pasos para redireccionar el frontend manualmente hacia la IP del backend:
+
+🔍 **1. Obtener la IP del backend**
+
+Primero, identifica el pod correspondiente al backend:
+```bash
+microk8s kubectl get pods
+microk8s kubectl describe pod reto2-back-deployment-xxxx-yyyy
+```
+Esto debería mostrar una salida similar a:
+
+<p align="center"> 
+  <img src="https://github.com/user-attachments/assets/542508a6-22ec-4313-8aeb-94cdc060a0a9" width="950px"> 
+</p>
+
+🧭 **2. Acceder al contenedor del frontend**
+
+Ingresa al contenedor donde está desplegado el frontend:
+```bash
+microk8s kubectl exec -it reto2-front-deployment-xxxx-yyyy -c reto2-front -- /bin/bash
+```
+
+📂 **3. Navegar a la ruta de NGINX**
+
+Una vez dentro del contenedor, ve al directorio donde se encuentran los archivos servidos por NGINX:
+```bash
+cd /usr/share/nginx/html/
+```
+
+🛠️ **4. Editar el archivo config.js**
+
+```bash
+nano config.js
+```
+Reemplaza el valor de la variable `API_URL`, sustituyendo `backend.local` por la IP del backend obtenida anteriormente y el puerto expuesto por el servicio (por defecto, 30080):
+
+```bash
+window.API_URL = 'http://192.168.1.12:30080';
+```
+
+---
+
 ⚠️ Importante:
 Para aprovechar al máximo las funcionalidades de la aplicación, se recomienda registrar un usuario administrador con los siguientes datos:
 | Parámetro         | Valor            |
