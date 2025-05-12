@@ -11,22 +11,32 @@ data:
     - name: app-alerts
       rules:
       - alert: HighMemoryUsage
-        expr: sum(container_memory_usage_bytes{container!="",container!="POD"}) by (pod) > 1e+09
+        expr: sum(container_memory_usage_bytes{container!="",container!="POD"}) by (pod) > 104857600
         for: 30s
         labels:
           severity: warning
         annotations:
           summary: "High memory usage detected on pod {{ $labels.pod }}"
-          description: "Memory usage is over 1 GB for more than 30 seconds."
+          description: "Memory usage is over 100 MB for more than 30 seconds."
 
       - alert: HighCpuUsage
-        expr: rate(container_cpu_usage_seconds_total{container!="",container!="POD"}[2m]) * 100 > 75
+        expr: rate(container_cpu_usage_seconds_total{container!="",container!="POD"}[2m]) * 100 > 50
         for: 1m
         labels:
           severity: warning
         annotations:
           summary: "High CPU usage on pod {{ $labels.pod }}"
-          description: "CPU usage is over 75% for more than 1 minute."
+          description: "CPU usage is over 50% for more than 1 minute."
+      
+      - alert: AppIsRunning
+        expr: |
+          count(kube_pod_status_phase{phase="Running", namespace="default", pod=~"reto2-.*"}) >= 3
+        for: 5s
+        labels:
+          severity: info
+        annotations:
+          summary: "UniverseGame app is running"
+          description: "At least 3 pods of the UniverseGame application are in Running state."
 
   prometheus.yml: |-
     global:
@@ -43,6 +53,12 @@ data:
               - "alertmanager-service.monitoring.svc:9093"
 
     scrape_configs:
+
+      - job_name: 'kube-state-metrics'
+        scrape_interval: 10s
+        static_configs:
+          - targets:
+              - 'kube-state-metrics.monitoring.svc:8080'
 
       - job_name: 'kubernetes-apiservers'
 
