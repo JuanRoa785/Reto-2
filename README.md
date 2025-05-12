@@ -165,6 +165,8 @@ microk8s kubectl apply -f reto2-front-deployment.yaml
 http://localhost:30420
 ```
 
+---
+
 #### ⚠️ Solución en caso de fallo del Ingress
 
 En algunos entornos (especialmente en clusters con múltiples nodos), el ingreso al backend mediante Ingress puede fallar, mostrando un error similar a este en pantalla:
