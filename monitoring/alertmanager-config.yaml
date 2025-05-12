@@ -24,19 +24,13 @@ data:
         receiver: alert-receiver
       - match:
           severity: info
-        receiver: info-receiver
+        receiver: alert-receiver
 
     receivers:
     - name: default-receiver
       slack_configs:
         - send_resolved: true
           channel: '#alertas'
-          text: '{{ template "slack.default.text" . }}'
-          title: "{{ range .Alerts }}{{ .Annotations.summary }}\n{{ end }}"
-    - name: info-receiver
-      slack_configs:
-        - send_resolved: true
-          channel: '#info'
           text: '{{ template "slack.default.text" . }}'
           title: "{{ range .Alerts }}{{ .Annotations.summary }}\n{{ end }}"
     - name: alert-receiver
